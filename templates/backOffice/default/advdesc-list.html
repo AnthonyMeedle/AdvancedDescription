@@ -1,0 +1,149 @@
+{extends file="admin-layout.tpl"}
+
+
+{block name="no-return-functions"}
+    {$admin_current_location = 'advanceddescription'}
+{/block}
+
+{block name="page-title"}{intl l='Gestion des descriptions avancée des hook'}{/block}
+
+{block name="main-content"}
+<div class="categories">
+    <div id="wrapper" class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="general-block-decorator">
+                    <div class="table-responsive">
+                         <table class="table table-striped table-condensed" id="lieu_list">
+                             <caption>
+								 {intl l="Liste des descriptions avancée"}
+
+                                 {loop type="auth" name="can_create" role="ADMIN" resource="admin.advanceddescription" access="CREATE"}
+                                 <a class="btn btn-primary action-btn clickmodiftyp" title="{intl l='Ajouter une nouvelle déscription'}" href="#advanceddescription_creation_dialog"  data-typobj="0" data-toggle="modal">
+                                     <span class="glyphicon glyphicon-plus-sign"></span>
+                                 </a>
+                                 {/loop}
+                             </caption>
+
+                             {ifloop rel="listeadvhook"}
+                                 <thead>
+                                     <tr>
+                                         <th class="object-title">Id</th>
+                                         <th class="object-title">Object Id</th>
+                                         <th class="object-title">Nom du hook</th>
+                                         <th class="actions">{intl l='Actions'}</th>
+                                     </tr>
+                                 </thead>
+
+                                 <tbody>
+                                 {loop name="listeadvhook" type="advanceddescription.object" objtype=5}
+                                 <tr>
+                                     <td>{$ID}</td>
+                                     <td>{$OBJID}</td>
+                                     <td class="object-title">
+                                         {loop name="hooks" type="hook" backend_context="1" id=$OBJID }
+                                             {$CODE} - {$TITLE}
+                                         {/loop}
+                                     </td>
+									 
+									  <td class="actions">
+                                             {loop type="auth" name="can_change" role="ADMIN" resource="admin.advanceddescription" access="UPDATE"}
+                                                <a class="field-edit btn btn-primary" title="{intl l='Edit this field'}" href="{url path="/admin/modules/advanceddescription/advdesc-edit" desc_id=$ID}" data-id="{$ID}" data-input="{$TITLE}" data-typch="{$TYPCH}" data-toggle="modal"><span class="glyphicon glyphicon-edit"></span></a>
+                                             {/loop}
+
+                                         {loop type="auth" name="can_delete" role="ADMIN" resource="admin.advanceddescription" access="DELETE"}
+											<a class="field-delete btn btn-danger" title="{intl l='Delete this field'}"  href="#advanceddescription_delete" data-id="{$ID}" data-toggle="modal"><span class="glyphicon glyphicon-trash"></span></a>
+										 {/loop}
+
+                                      </td>
+                                 </tr>
+                                 {/loop}
+                                 </tbody>
+                             {/ifloop}
+
+                             {elseloop rel="listeadvhook"}
+                             <thead>
+                                 <tr>
+                                     <td class="message">
+                                         <div class="alert alert-info">
+                                         {loop type="auth" name="can_create" role="ADMIN" resource="admin.advanceddescription" access="CREATE"}
+                                             {intl l="Aucune description de créée pour le moment, cliquez sur le + pour créer une description."}
+                                         {/loop}
+
+                                         {elseloop rel="can_create"}
+                                            {intl l="Vous n'avez pas les droits pour créer un champ."}
+                                         {/elseloop}
+                                         </div>
+                                     </td>
+                                 </tr>
+                             </thead>
+                             {/elseloop}
+                         </table>
+                     </div>
+                </div>
+            </div>
+        </div>
+		
+	</div>
+</div>
+
+
+    {form name="thelia.admin.module-hook.creation"}
+
+	{capture "advanceddescription_creation_dialog"}
+        {render_form_field field="hook_id"}
+		<input type="hidden" name="action" value="advanceddescription_creation_dialog">
+		<input type="hidden" name="success_url" value="{url path='/admin/modules/advanceddescription/advdesc-list'}">
+    {/capture}
+    {include
+        file = "includes/generic-create-dialog.html"
+        dialog_id    = "advanceddescription_creation_dialog"
+        dialog_title = {intl l="Create a new textarea"}
+        dialog_body  = {$smarty.capture.advanceddescription_creation_dialog nofilter}
+        dialog_ok_label     = {intl l="Create this advanced description"}
+        form_action        = {url path='/admin/modules/advanceddescription/form'}
+
+        form_enctype       = {form_enctype}
+        form_error_message = $form_error_message
+    }
+    {/form}
+
+{capture "advanceddescription_delete"}
+	<input type="hidden" name="id" id="object_id" value="" />
+	<input type="hidden" name="success_url" value="{url path='/admin/modules/advanceddescription/advdesc-list'}" />
+	<input type="hidden" name="action" value="advanceddescription_delete" />
+{/capture}
+
+{include
+file = "includes/generic-confirm-dialog.html"
+
+dialog_id       = "advanceddescription_delete"
+dialog_title    = {intl l="Supprimer le champ"}
+dialog_message  = {intl l="Êtes vous sur de vouloir supprimer ce champ ?"}
+
+form_action         = {token_url path='/admin/modules/advanceddescription/form'}
+form_content        = {$smarty.capture.advanceddescription_delete nofilter}
+}
+
+{/block}
+
+{block name="javascript-initialization"}
+    <script>
+        $(function() {
+            $('a.field-delete').click(function(ev) {
+                $('#field_delete_id').val($(this).data('id'));
+            });
+            $('a.field-edit').click(function(ev) {
+                $('#field_edit_title').val($(this).data('input'));
+                $('#field_edit_type option[value="'+ $(this).data('typch') +'"]').prop('selected', true);
+                $('#field_edit_id').val($(this).data('id'));
+            });
+            $('.clickmodiftyp').click(function(ev) {
+                $('#typobj').val($(this).data('typobj'));
+            });
+		});
+	</script>
+{/block}
+{block name="javascript-last-call"}
+    {hook name="home.js" location="home-js" }
+{/block}

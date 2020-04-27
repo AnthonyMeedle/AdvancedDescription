@@ -1,0 +1,117 @@
+<script>    
+    $('#tabbed-menu li a').click(function(){
+        if($(this).attr('href') == '#general'){
+            $('.block-advanced-description').removeClass('d-none hide');
+        }else{
+            $('.block-advanced-description').addClass('d-none hide');
+        }
+    });
+    $('.btn-advanceddescritpion').click(function(){
+        var config = $('#advanceddescriptionconfig').val();
+        var numDerLine = 1;
+        if($('.advanceddescription-line').length){
+            var numDerLine = $('.advanceddescription-line:last').data('line');
+            numDerLine = numDerLine + 1;
+        }
+        if(config) config += ',';
+        $('#advanceddescriptionconfig').val(config + $(this).data('line'));
+        $.ajax({
+         url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-config?id="}" + $(this).data('line') + '&numline=' + numDerLine,
+         type     : 'get',
+         dataType : 'html',
+         success  : function(retour) {
+            $('#advanced-description-champs').append(retour);
+            $('.advanceddescription-line .glyphicon-trash').unbind().click(function(){
+                $('.advanceddescription-line-' + $(this).data('line')).remove();
+                reloadStructure();
+            });
+            reloadStructure();
+            choisirImg();
+         }
+        });
+    });
+    
+    $('.advanceddescription-line .glyphicon-trash').unbind().click(function(){
+        $('.advanceddescription-line-' + $(this).data('line')).remove();
+        reloadStructure();
+    });
+    
+    function choisirImg(){
+        $('.choisir_img').unbind().click(function(){
+            $('.advanceddescription-line-' + $('.advdesc-img-line').val()).find('.champ-image-' + $('.advdesc-img-num').val()).val($(this).attr('alt'));
+            if($('.advdesc-vignette-' + $('.advdesc-img-line').val()+'-'+ $('.advdesc-img-num').val()).length){
+                $('.advdesc-vignette-' + $('.advdesc-img-line').val()+'-'+ $('.advdesc-img-num').val()).attr('src', $(this).data('src'));
+
+            }else{
+                $('.btn-modal-img[data-line="'+ $('.advdesc-img-line').val() +'"][data-img="'+ $('.advdesc-img-num').val() +'"]').after(' <img src="' + $(this).data('src') + '" alt="" class="advdesc-vignette-'+ $('.advdesc-img-line').val() +'-'+ $('.advdesc-img-num').val() +'">');
+            }
+
+        });
+
+        $('.btn-modal-img').unbind().click(function(){
+            $('.advdesc-img-line').val($(this).data('line'));
+            $('.advdesc-img-num').val($(this).data('img'));
+        });
+    }
+    function reloadStructure(){
+        $('#advanceddescriptionconfig').val('');
+        var structures='';
+        var orderline='';
+        $('.advanceddescription-line').each(function(){
+            if(structures)structures += ',';
+            structures += $(this).data('structure');
+            if(orderline)orderline += ',';
+            orderline += $(this).data('line');
+        });
+        $('#advanceddescriptionconfig').val(structures);
+        $('#advanceddescriptionordre').val(orderline);
+    }
+
+    var advDescImageDropzone = new Dropzone("#advdescdrop", {
+        dictDefaultMessage : $('.btn-browse').html(),
+        uploadMultiple: false,
+        acceptedFiles: 'image/png, image/gif, image/jpeg'
+    });    
+
+    var totalFiles      = 0,
+        completedFiles  = 0;
+
+    advDescImageDropzone.on("addedfile", function(file){
+        totalFiles += 1;
+
+        if(totalFiles == 1){
+            $('.dz-message').hide();
+        }
+    });
+
+    advDescImageDropzone.on("complete", function(file){
+        completedFiles += 1;
+
+        if (completedFiles === totalFiles){
+            $('.dz-message').slideDown();
+        }
+    });
+
+    advDescImageDropzone.on("success", function(file) {
+        advDescImageDropzone.removeFile(file);
+        $.ajax({
+         url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-file-img"}",
+         type     : 'get',
+         dataType : 'html',
+         success  : function(retour) {
+            $('#ajax-advdesc-img').html(retour);
+            choisirImg();
+         }
+        });
+        
+    });
+    choisirImg();
+    $( "#advanced-description-champs" ).sortable({
+        placeholder: "ui-sortable-placeholder col-sm-12 my-5 py-5 alert alert-warning",
+        stop: function( event, ui ) {
+            reloadStructure();
+        }
+    });
+    $( "#advanced-description-champs" ).disableSelection();
+
+</script>

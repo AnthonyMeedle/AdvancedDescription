@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="advanceddescription.config" class="AdvancedDescription\Loop\AdvancedDescriptionConfig" />
+        <loop name="advanceddescription.object" class="AdvancedDescription\Loop\AdvancedDescriptionObject" />
+        <loop name="advanceddescription.image" class="AdvancedDescription\Loop\AdvancedDescriptionImage" />
+        <loop name="advanceddescription.description" class="AdvancedDescription\Loop\AdvancedDescriptionDescription" />
+    </loops>
+
+    <forms>
+        <!--
+        <form name="MyFormName" class="AdvancedDescription\Form\MySuperForm" />
+        -->
+    </forms>
+
+    <commands>
+        <!--
+        <command class="AdvancedDescription\Command\MySuperCommand" />
+        -->
+    </commands>
+
+    <!--
+    <services>
+
+    </services>
+    -->
+
+
+    <hooks>
+        <hook id="advanceddescription.hook" class="AdvancedDescription\Hook\AdvancedDescriptionHook">
+        	<tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuToolsContents" />
+            <tag name="hook.event_listener" event="advanced-description" type="front" method="onAdvancedDescription" />
+            <tag name="hook.event_listener" event="category-edit.bottom" type="back" method="onCategoryEditBottom" />
+            <tag name="hook.event_listener" event="category.edit-js" type="back" method="onCategoryEditJs" />
+            <tag name="hook.event_listener" event="product-edit.bottom" type="back" method="onProductEditBottom" />
+            <tag name="hook.event_listener" event="product.edit-js" type="back" method="onProductEditJs" />
+            <tag name="hook.event_listener" event="folder-edit.bottom" type="back" method="onFolderEditBottom" />
+            <tag name="hook.event_listener" event="folder.edit-js" type="back" method="onFolderEditJs" />
+            <tag name="hook.event_listener" event="content-edit.bottom" type="back" method="onContentEditBottom" />
+            <tag name="hook.event_listener" event="content.edit-js" type="back" method="onContentEditJs" />
+        </hook>
+    </hooks>
+
+
+    <!--
+    <exports>
+
+    </exports>
+    -->
+
+    <!--
+    <imports>
+
+    </imports>
+    -->
+</config>

@@ -1,0 +1,5 @@
+{if $objid}
+{loop type="advanceddescription.description" name="advdesc" objtype=$objtype objid=$objid}
+    {$DESCRIPTION nofilter}
+{/loop}
+{/if}

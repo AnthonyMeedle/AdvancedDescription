@@ -1,0 +1,55 @@
+{if $numline=='' && $smarty.get.numline != ''}{$numline=$smarty.get.numline}{/if}
+{loop type="advanceddescription.config" name="ajoutline" id="{$smarty.get.id|default:$line_id}" numline={$numline} object_id=$object_id lang=$edit_language_id}
+<div class="row mb-3 ui-state-default advanceddescription-line-{$numline} advanceddescription-line" data-structure="{$ID}" data-line="{$numline}" data-sort-id="{$numline}" style="border: 0.5px solid #CCC; border-radius: 4px; padding: 1em; margin: 2em 0;">
+    <input type="hidden" name="variable[{$NUMLINE}][structure]" value="{$ID}" >
+    <div class="col-md-2">
+        {$TITLE}{if $IMAGE} 
+        <img src="{image file="assets/images/{$IMAGE}" source="AdvancedDescription" }" alt="{$TITLE}" width="80">{/if}
+        <i class="glyphicon glyphicon-wrench btn btn-primary" data-line="{$numline}" onclick="$('.parametre-{$numline}').removeClass('d-none hide');"></i> <i class="glyphicon glyphicon-trash btn btn-danger" data-line="{$numline}"></i>
+    </div>
+    <div class="col-md-10">
+    {$STRUCTURE_BO nofilter}
+    </div>
+    <div class="alert alert-info col-md-12 d-none hide parametre-{$numline}" style="margin-top: 1em;">
+        {if $OPTION_TITRE}
+        <div class="col-md-1">
+            <select name="variable[{$NUMLINE}][option]" class="form-control">
+                <option value="0"{if $OPTION_H == 0} selected{/if}>Ne pas afficher</option>
+                <option value="1"{if $OPTION_H == 1} selected{/if}>h1</option>
+                <option value="2"{if $OPTION_H == 2} selected{/if}>h2</option>
+                <option value="3"{if $OPTION_H == 3} selected{/if}>h3</option>
+                <option value="4"{if $OPTION_H == 4} selected{/if}>h4</option>
+                <option value="5"{if $OPTION_H == 5} selected{/if}>h5</option>
+            </select>
+        </div>
+        {/if}
+        {if $OPTION_CLASS}
+        <div class="col-md-3">
+            <input type="text" name="variable[{$NUMLINE}][class]" value="{$CLASS}" placeholder="class" class="form-control">
+        </div>
+        {/if}
+        {if $OPTION_CLASS_1}
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][0]" value="{$CLASS0}" placeholder="class" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][1]" value="{$CLASS1}" placeholder="class" class="form-control">
+        </div>
+        {/if}
+        {if $OPTION_CLASS_3}
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][0]" value="{$CLASS0}" placeholder="class" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][1]" value="{$CLASS1}" placeholder="class" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][2]" value="{$CLASS2}" placeholder="class" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="variable[{$NUMLINE}][class][3]" value="{$CLASS3}" placeholder="class" class="form-control">
+        </div>
+        {/if}
+    </div>
+</div>
+{/loop}

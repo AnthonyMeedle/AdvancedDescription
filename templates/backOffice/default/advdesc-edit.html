@@ -1,0 +1,61 @@
+{extends file="admin-layout.tpl"}
+
+
+{block name="no-return-functions"}
+    {$admin_current_location = 'advanceddescription'}
+    {if $smarty.get.desc_id}
+    {loop type="advanceddescription.object" name="lines" id="{$smarty.get.desc_id}"}
+        {$object_id=$OBJID}
+    {/loop}
+    {/if}
+{/block}
+
+{block name="page-title"}{intl l='Descriptions avancée du hook'}{if $object_id} {loop name="hooks" type="hook" backend_context="1" id=$object_id limit=1}"{$CODE}"{/loop}{/if}{/block}
+
+{block name="main-content"}
+<div class="container">
+    {if $smarty.get.desc_id}
+     {form name="thelia.admin.module-hook.creation"}
+    <div class="general-block-decorator">
+        <form method="post" action="{url path='/admin/modules/advanceddescription/form'}" >
+            {intl l="Update hook advanced description"}
+            <input type="hidden" name="action" value="update-emplacement-hook">
+            <input type="hidden" name="id" value="{$smarty.get.desc_id}">
+
+            {render_form_field field="hook_id" value=$object_id}
+            <input type="hidden" name="success_url" value="{url path="/admin/modules/advanceddescription/advdesc-edit" desc_id={$smarty.get.desc_id}}">
+
+            <button class="btn btn-primary">{intl l="Update this advanced description"}</button>
+        </form>
+    </div>
+    {/form}
+    
+    {include
+        file = "AdvancedDescription/hook/advancedDescriptionForm.html"
+        object_type_id = 5
+        objtype        = 5
+        object_id      = $object_id
+        objid          = $object_id
+        success_url    = {url path="/admin/modules/advanceddescription/advdesc-edit" desc_id={$smarty.get.desc_id}}
+        changelang          = 1
+    }
+    {/if}
+</div>
+{/block}
+
+{block name="javascript-initialization"}
+    {javascripts file='assets/js/dropzone.js'}
+        <script src="{$asset_url}"></script>
+    {/javascripts}
+
+    {javascripts file='assets/js/jquery-ui-1.10.3.custom.min.js'}
+        <script src="{$asset_url}"></script>
+    {/javascripts}
+{/block}
+{block name="javascript-last-call"}
+    
+    {include
+        file = "AdvancedDescription/hook/advancedDescriptionJs.html"
+    }
+    {hook name="wysiwyg.js" location="wysiwyg-category-edit-js" }
+{/block}

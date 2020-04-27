@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../core/vendor/thelia/propel/resources/xsd/database.xsd" >
+
+    <table name="advanced_description_config" namespace="AdvancedDescription\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column defaultValue="0" name="position" required="true" type="INTEGER" />
+        <column name="title" size="255" type="VARCHAR" />
+        <column name="structure_bo" type="CLOB" />
+        <column name="structure_fo" type="CLOB" />
+        <column name="image" size="100" type="VARCHAR" />
+        <behavior name="timestampable" />
+    </table>
+    <table name="advanced_description_object" namespace="AdvancedDescription\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="hook_code" size="50" type="VARCHAR" />
+        <column defaultValue="0" name="objtype" required="true" type="INTEGER" />
+        <column defaultValue="0" name="objid" required="true" type="INTEGER" />
+        <column name="structures" size="255" type="VARCHAR" />
+        <column name="variables" type="CLOB" />
+        <column name="valeurs" type="CLOB" />
+        <behavior name="i18n">
+          <parameter name="i18n_columns" value="valeurs" />
+        </behavior>
+        <behavior name="timestampable" />
+    </table>
+</database>
