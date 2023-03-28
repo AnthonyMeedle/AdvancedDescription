@@ -1,0 +1,7 @@
+{if empty($img_file)}{$img_file=''}{/if}
+{if isset($smarty.get.img_file) && $smarty.get.img_file}{$img_file = $smarty.get.img_file}{/if}
+{loop type="advanceddescription.image" name="img" width="100" height="100" resize_mode="borders"}
+<div style=" padding: 4px; ">
+	<input type="radio" name="image" value="{$FILE}" data-src="{loop type="advanceddescription.image" name="img2" width="800" file="{$FILE}"}{$IMAGE_URL}{/loop}" id="imgedit{$LOOP_COUNT}" class="choiximgedit"{if $img_file == $FILE} checked{/if} ><label for="imgedit{$LOOP_COUNT}"><img src="{$IMAGE_URL}" alt="{$FILE}" title="{$FILE}" > </label>
+</div>
+{/loop}

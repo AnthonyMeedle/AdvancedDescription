@@ -48,7 +48,7 @@
 									 
 									  <td class="actions">
                                              {loop type="auth" name="can_change" role="ADMIN" resource="admin.advanceddescription" access="UPDATE"}
-                                                <a class="field-edit btn btn-primary" title="{intl l='Edit this field'}" href="{url path="/admin/modules/advanceddescription/advdesc-edit" desc_id=$ID}" data-id="{$ID}" data-input="{$TITLE}" data-typch="{$TYPCH}" data-toggle="modal"><span class="glyphicon glyphicon-edit"></span></a>
+                                                <a class="field-edit btn btn-primary" title="{intl l='Edit this field'}" href="{url path="/admin/modules/advanceddescription/advdesc-edit" desc_id=$ID}" data-id="{$ID}" data-input="{$TITLE}" data-typch="{if isset($TYPCH)}{$TYPCH}{/if}" data-toggle="modal"><span class="glyphicon glyphicon-edit"></span></a>
                                              {/loop}
 
                                          {loop type="auth" name="can_delete" role="ADMIN" resource="admin.advanceddescription" access="DELETE"}
@@ -91,7 +91,7 @@
     {form name="thelia.admin.module-hook.creation"}
 
 	{capture "advanceddescription_creation_dialog"}
-        {render_form_field field="hook_id"}
+        {render_form_field field="hook_id" block=0}
 		<input type="hidden" name="action" value="advanceddescription_creation_dialog">
 		<input type="hidden" name="success_url" value="{url path='/admin/modules/advanceddescription/advdesc-list'}">
     {/capture}
@@ -109,7 +109,8 @@
     {/form}
 
 {capture "advanceddescription_delete"}
-	<input type="hidden" name="id" id="object_id" value="" />
+	<input type="hidden" name="id" id="field_delete_id" value="" />
+	<input type="hidden" name="objtype"  value="5" />
 	<input type="hidden" name="success_url" value="{url path='/admin/modules/advanceddescription/advdesc-list'}" />
 	<input type="hidden" name="action" value="advanceddescription_delete" />
 {/capture}

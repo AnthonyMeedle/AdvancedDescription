@@ -9,6 +9,10 @@
         <loop name="advanceddescription.object" class="AdvancedDescription\Loop\AdvancedDescriptionObject" />
         <loop name="advanceddescription.image" class="AdvancedDescription\Loop\AdvancedDescriptionImage" />
         <loop name="advanceddescription.description" class="AdvancedDescription\Loop\AdvancedDescriptionDescription" />
+        <loop name="advanceddescription" class="AdvancedDescription\Loop\AdvancedDescriptionLoop" />
+        <loop name="advanced-description" class="AdvancedDescription\Loop\AdvancedDescriptionFrontLoop" />
+        <loop name="advanceddescription-child" class="AdvancedDescription\Loop\AdvancedDescriptionChildLoop" />
+        <loop name="advanceddescription-value" class="AdvancedDescription\Loop\AdvancedDescriptionValueLoop" />
     </loops>
 
     <forms>

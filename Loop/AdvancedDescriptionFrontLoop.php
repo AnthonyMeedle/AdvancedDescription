@@ -19,7 +19,7 @@ use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
 
 
-class AdvancedDescriptionDescription extends BaseI18nLoop implements PropelSearchLoopInterface
+class AdvancedDescriptionFrontLoop extends BaseI18nLoop implements PropelSearchLoopInterface
 {
     protected $timestampable = true;
 
@@ -113,40 +113,31 @@ class AdvancedDescriptionDescription extends BaseI18nLoop implements PropelSearc
 			$img_url = '';
 			$img_miniature = '';
 
-			if(isset($variables->child)){
-			if(isset($variables->child->$numline)){
-				if($variables->child->$numline){
-					foreach($variables->child->$numline as $numlineChild){
-						$childStructure .= $this->htmlLine($valeurs, $variables, $numlineChild);
-					}
+
+			if($variables->child){
+				foreach($variables->child as $numlineChild){
+					$childStructure .= $this->htmlLine($valeurs, $variables, $numlineChild);
 				}
 			}
-			}
-			if($structure->structure == 1){$option=1;}
+			
 			if(isset($valeurs->$numline->value)) $value = $valeurs->$numline->value;
-			if(isset($structure->option)) $option = $structure->option;
+			if(isset($valeurs->$numline->option)) $option = $valeurs->$numline->option;
 			if(isset($valeurs->$numline->img_file)) $img_file = $valeurs->$numline->img_file;
 			if(isset($valeurs->$numline->img_alt)) $img_alt = $valeurs->$numline->img_alt;
 			if(isset($structure->css_class)) $cssClass = $structure->css_class;
 			if(isset($structure->css_id)) $cssId = $structure->css_id;
-			
 			if($structure->structure == 10){
 				$value = nl2br($value);
 			}
 			if($structureHtml->getId() == 3){
-				$value='';
 				$advancedDescription = new \AdvancedDescription\AdvancedDescription;
 				if($img_file && is_file($advancedDescription->getUploadDir() . DS . $img_file)){
 					$event = new ImageEvent();
 					$event->setSourceFilepath($advancedDescription->getUploadDir() . DS . $img_file)->setCacheSubdirectory('advancedDescription');
 					$event->setWidth(800);
-					$this->dispatcher->dispatch($event, TheliaEvents::IMAGE_PROCESS);
+					$this->dispatcher->dispatch(TheliaEvents::IMAGE_PROCESS, $event);
 					$value = $img_url = $event->getFileUrl();
-					$cssClass .= ' img-fluid';
 				}
-			}
-			if($structureHtml->getId() == 12){
-			$cssClass .= ' mb-4 align-items-center';
 			}
 
 			$balise = $structureHtml->getStructureFo();
@@ -159,9 +150,8 @@ class AdvancedDescriptionDescription extends BaseI18nLoop implements PropelSearc
 			$balise = str_replace('{$CSS_ID}', $cssId , $balise);	
 			$balise = str_replace('{$CHILD}', $childStructure , $balise);	
 			$balise = str_replace('{$VALUE}', $value , $balise);	
-			$balise = str_replace('{$OPTION}', $option , $balise);	
-			$balise = str_replace('{$ALT}', $img_alt , $balise);	
 			$variables_return .= $balise;
+
 		}	
 		return $variables_return;
 	}
@@ -178,12 +168,12 @@ class AdvancedDescriptionDescription extends BaseI18nLoop implements PropelSearc
 			if(!$locale){
 				$locale = $this->locale;
 			}
+			echo $locale;
 			$objet->setLocale($locale);
 			$valeurs = json_decode( $objet->getValeurs() );
-			if(isset($variables->racine)){
-				foreach($variables->racine as $numline){
-					$description .= $this->htmlLine($valeurs, $variables, $numline);
-				}
+			
+			foreach($variables->racine as $numline){
+				$description .= $this->htmlLine($valeurs, $variables, $numline);
 			}
 			$loopResultRow
 				->set('ID', $objet->getId())

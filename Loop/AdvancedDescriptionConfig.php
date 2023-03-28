@@ -60,6 +60,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
      */
     public function parseResults(LoopResult $loopResult)
     {
+		$variable='';
         $locale='fr_FR';
         if($this->getLang()){
             if(null !== $lang = LangQuery::create()->findPk($this->getLang())){
@@ -80,6 +81,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
             $option_class=1;
             $option_class_tab_1=0;
             $option_class_tab=0;
+            $option_repartition='';
             $option_class_0='';
             $option_class_1='';
             $option_class_2='';
@@ -98,6 +100,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
                         $value = $variables[$numline]['variable'];
                     $option = $variables[$numline]['option'];
                     $class = $variables[$numline]['class'];
+					if(isset($valeurs[$numline]['repartition'])) $option_repartition = $variables[$numline]['repartition'];
                     if($objet->getId() == 3){
                         $structure_fo = str_replace('{$TITLE0}', $value[0], $structure_fo);
                         $option_class=0;
@@ -129,7 +132,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
                         $structure_fo = str_replace('{$TITLE}', $value[0], $structure_fo);
                         $option_class=0;
                         $option_class_tab=1;
-                        
+						
                         $structure_bo = str_replace('{$VALUE}', $value[0], $structure_bo);
                         $file=$value[0];
                         $advancedDescription = new \AdvancedDescription\AdvancedDescription;
@@ -236,6 +239,22 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
                 $structure_fo = str_replace('{$CLASS}', '', $structure_fo);
                 $optionTitre=1;
             }
+			
+			
+            if($objet->getId() == 5 || $objet->getId() == 6){
+				if(!$option_repartition){
+					if($objet->getId() == 5){
+						$option_repartition = '5_7';
+					}else{
+						$option_repartition = '7_5';
+					}
+				}
+				$inforepartition = explode('_', $option_repartition);
+				$structure_fo = str_replace('{$REPARTITION_1}', $inforepartition[0], $structure_fo);
+				$structure_fo = str_replace('{$REPARTITION_2}', $inforepartition[1], $structure_fo);
+			}
+						
+			
             $structure_fo = str_replace('{$CLASS}', '', $structure_fo);
             if(is_array($value)){
                 $structure_bo = str_replace('{$VALUE}', $value[0], $structure_bo);
@@ -255,7 +274,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
 
                     $event = new DefaultActionEvent();
                     $event->__set('text', $val);
-                    $this->dispatcher->dispatch('urlintexte_parsetext', $event);
+                    $this->dispatcher->dispatch($event, 'urlintexte_parsetext');
                     $val = $event->__get('text');
                     $structure_fo = str_replace('{$VALUE'. $index .'}', $val, $structure_fo);
                 }
@@ -268,17 +287,38 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
             $structure_bo = str_replace('{$BALISE_IMAGE2}', '', $structure_bo);
             $structure_bo = str_replace('{$BALISE_IMAGE3}', '', $structure_bo);
 
+			$structure_fo = str_replace('{$REPARTITION_1}', '6', $structure_fo);
+			$structure_fo = str_replace('{$REPARTITION_2}', '6', $structure_fo);
+			$structure_fo = str_replace('{$OPTION_REPARTITION}', $option_repartition, $structure_fo);
+
             $structure_bo = str_replace('{$NAME}', 'variable['. $numline .'][variable][]', $structure_bo);
             
+			$structure_bo_return='';
+			$cssClass='';
+			$cssId='';
+			$numline++;
+			$child = '<div><div id="insertline_'. $numline .'"></div><div class="text-center"><a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="btn btn-info btn-responsive action-btn btn-edit-advdesc" data-toggle="modal" data-numline="'. $numline .'"  data-valueid="'. $objet->getId() .'" ><i class="glyphicon glyphicon-edit"></i></a> <a title="Ajouter une ligne" href="#advanceddescritpion_creation_dialog" class="btn btn-warning btn-responsive action-btn btn-add-advdesc" data-toggle="modal" data-parent="'. $numline .'"><i class="glyphicon glyphicon-plus-sign"></i></a></div></div>';
+			$balise = $objet->getStructureBo();
+			$balise = str_replace('{$NAME}', 'variable['. $numline .'][variable][]' , $balise);	
+			$balise = str_replace('{$CSS_CLASS}', $cssClass , $balise);	
+			$balise = str_replace('{$CSS_ID}', $cssId , $balise);	
+			$balise = str_replace('{$CHILD}', $child , $balise);	
+			$structure_bo_return .= $balise;
+
             
             $loopResultRow
                 ->set('ID', $objet->getId())
                 ->set('TITLE', $objet->getTitle())
-                ->set('STRUCTURE_BO', $structure_bo)
+				->set('NUMLINE', $numline)
+				->set('STRUCTURE_BO', $structure_bo_return)
+				->set('STRUCTURE_ID', $objet->getId())
+//                ->set('STRUCTURE_BO', $structure_bo)
                 ->set('STRUCTURE_FO', $structure_fo)
                 ->set('IMAGE', $objet->getImage())
                 ->set('NUMLINE', $numline)
                 ->set('VARIABLE', $variable)
+                ->set('CSS_CLASS', $cssClass)
+                ->set('CSS_ID', $cssId)
                 ->set('OPTION_TITRE', $optionTitre)
                 ->set('OPTION_H', $option)
                 ->set('OPTION_CLASS', $option_class)
@@ -288,6 +328,7 @@ class AdvancedDescriptionConfig extends BaseLoop implements PropelSearchLoopInte
                 ->set('CLASS1', $option_class_1)
                 ->set('CLASS2', $option_class_2)
                 ->set('CLASS3', $option_class_3)
+                ->set('OPTION_REPARTITION', $option_repartition)
 			;
             
             if(is_array($class)){

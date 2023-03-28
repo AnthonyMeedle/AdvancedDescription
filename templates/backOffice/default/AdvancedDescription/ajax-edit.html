@@ -1,0 +1,67 @@
+<input type="hidden" name="numline" id="editnumline" value="{$smarty.request.numline}" >
+{$tinymce=0}
+{loop type="advanceddescription-value" name='editform' line={$smarty.request.numline}  id={$smarty.request.id} locale=$edit_language_locale}
+<input type="hidden" name="structure_id" id="editstructureid" value="{$STRUCTURE_ID}" >
+	{if $STRUCTURE_ID == 1}
+
+	<div class="form-group ">
+		<label>Option : taille du titre</label>
+		<select name="option" class="form-control" id="editoption" >
+			<option value="1"{if {$OPTION|default:1}} selected{/if} class="h1">h1</option>
+			<option value="2"{if $OPTION == 2} selected{/if} class="h2">h2</option>
+			<option value="3"{if $OPTION == 3} selected{/if} class="h3">h3</option>
+			<option value="4"{if $OPTION == 4} selected{/if} class="h4">h4</option>
+			<option value="5"{if $OPTION == 5} selected{/if} class="h5">h5</option>
+			<option value="6"{if $OPTION == 6} selected{/if} class="h6">h6</option>
+		</select>
+	</div>	
+
+	<div class="form-group ">
+		<label>Titre</label>
+		<input type="text" name="value" id="editvalueinput" class="form-control" value="{$VALUE nofilter}" >
+	</div>
+	{/if}
+	{if $STRUCTURE_ID == 2}
+		{$texte=$VALUE}
+{*
+	<div class="form-group ">
+		<label>Texte</label>
+		<div style="position: relative;">
+			<textarea name="value" id="editvaluetextenrichie" class="form-control wysiwyg" rows="6" >{$VALUE nofilter}</textarea>
+		</div>
+	</div> *}
+		{$tinymce=1}
+
+	{/if}
+	{if $STRUCTURE_ID == 10}
+	<div class="form-group ">
+		<label>Texte</label>
+		<textarea name="value" id="editvaluetext" class="form-control" rows="6" >{$VALUE nofilter}</textarea>
+	</div>
+	{/if}
+	{if $STRUCTURE_ID == 3}
+	<div class="form-group ">
+		<label>Attribut ALT</label>
+		<input type="text" name="alt" id="editvaluealt" class="form-control" value="{$ALT}" >
+	</div>
+	{$img_file=$FILE}
+	<div class="form-group" id="listimgdispo" style="display: flex; flex-wrap: wrap;">
+		{include file="AdvancedDescription/ajax-file-img-edit.html" img_file=$img_file}
+	</div>
+
+	<div class="form-group ">
+		<a title="Gestion image" href="#advanceddescritpion_updateimg" data-line="1" class="btn btn-primary btn-responsive action-btn btn-modal-img" data-toggle="modal" data-img="1"><i class="glyphicon glyphicon-plus-sign"></i> Ajouter des images</a>
+	</div>
+	{/if}
+{/loop}
+
+
+{if $tinymce}
+<script>
+    document.getElementById('textenrichie').setAttribute('class', 'form-group ');
+</script>
+{else}
+<script>
+    document.getElementById('textenrichie').setAttribute('class', 'form-group hide d-none');
+</script>
+{/if}

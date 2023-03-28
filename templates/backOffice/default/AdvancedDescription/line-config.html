@@ -1,0 +1,62 @@
+{* ui-state-default data-sort-id="{$NUMLINE}" *}
+<div class="{$CSS_CLASS|default:"row col-md-12"} {if $STRUCTURE_ID == 1 || $STRUCTURE_ID == 2 || $STRUCTURE_ID == 3 || $STRUCTURE_ID == 10}col-md-12{/if} mb-3  advanceddescription-line-{$NUMLINE} advanceddescription-line" data-structure="{$STRUCTURE_ID}" data-line="{$NUMLINE}"  style="border: 0.5px solid #CCC; border-radius: 4px; padding: 1em; margin: 2em 0; display: flex; flex-wrap: wrap;">
+	<input type="hidden" name="variableOld{if isset($smarty.get.lineparent) && $smarty.get.lineparent}[child][{$smarty.get.lineparent}]{else}[racine]{/if}[{$NUMLINE}][structure]" value="{$ID}" >
+	
+	<input type="hidden" name="variable{if isset($lineparent) && $lineparent}[child][{$lineparent}]{else}[racine]{/if}[]" value="{$NUMLINE}" >
+	<input type="hidden" name="variable[{$NUMLINE}][structure]" id="st_li{$NUMLINE}" value="{$STRUCTURE_ID}" >
+	<input type="hidden" name="variable[{$NUMLINE}][css_class]" id="cc_li{$NUMLINE}" value="{$CSS_CLASS}" >
+	<input type="hidden" name="variable[{$NUMLINE}][css_id]" id="ci_li{$NUMLINE}" value="{$CSS_ID}" >
+	{if $STRUCTURE_ID == 1}
+	<input type="hidden" name="variable[{$NUMLINE}][option]" id="option_li{$NUMLINE}" value="{$OPTION}" >
+	{/if}
+	<div class="col-md-12">
+		{if $STRUCTURE_ID == 1}
+		<div class="zone-value btn-edit-advdesc" href="#advanceddescritpion_edit_dialog"  data-toggle="modal" data-numline="{$NUMLINE}"  data-valueid="{$ID}" >
+			{if $VALUE}
+				<h{$OPTION|default:1}>{$VALUE nofilter}</h{$OPTION|default:1}>
+			{else}
+			<p class="text-center">
+				<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog"  >Éditer pour ajouter un titre</a> 
+			</p>
+			{/if}
+		</div>
+		{/if}
+		
+		{if $STRUCTURE_ID == 2 || $STRUCTURE_ID == 10}
+		<div class="zone-value btn-edit-advdesc{if $VALUE && $STRUCTURE_ID == 2} htmlintiny{/if}" href="#advanceddescritpion_edit_dialog"  data-toggle="modal" data-numline="{$NUMLINE}"  data-valueid="{$ID}" >
+			{if $VALUE}
+				{$VALUE nofilter}
+			{else}
+			<p class="text-center" >
+				<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog"  >Éditer pour ajouter du texte</a> 
+			</p>
+			{/if}
+		</div>
+		{/if}
+		{if $STRUCTURE_ID == 3}
+		<div class="zone-value btn-edit-advdesc text-center" href="#advanceddescritpion_edit_dialog"  data-toggle="modal" data-numline="{$NUMLINE}"  data-valueid="{$ID}" >
+			{if $MINIATURE_URL}
+				<img src="{$IMAGE_URL}" alt="{$ALT}" class="{$CSS_CLASS} img-responsive" id="{$CSS_ID}">
+			{else}
+			<p class="text-center">
+				<a title="Éditer une ligne" >Éditer pour ajouter une image</a> 
+			</p>
+			{/if}
+		</div>	
+		{/if}
+		{if $STRUCTURE_ID == 4}
+			<hr>
+		{/if}
+		<div id="insertline_{$NUMLINE}" class="row" style="display: flex; flex-wrap: wrap;">
+		{$parent=$NUMLINE}
+		{loop type="advanceddescription-child" name=$nomboucle parent=$NUMLINE  id=$ID locale=$edit_language_locale}
+			{include file="./line-config.html" source="AdvancedDescription" nomboucle="adv{$NUMLINE}" lineparent=$parent}
+		{/loop}
+		</div>
+		<div class="text-center btn-visible-hover">
+			<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="btn btn-info btn-responsive action-btn btn-edit-advdesc" data-toggle="modal" data-numline="{$NUMLINE}"  data-valueid="{$ID}" ><i class="glyphicon glyphicon-edit"></i></a> 
+		{if $STRUCTURE_ID == 12}	<a title="Ajouter une ligne" href="#advanceddescritpion_creation_dialog" class="btn btn-warning btn-responsive action-btn btn-add-advdesc" data-toggle="modal" data-parent="{$NUMLINE}"><i class="glyphicon glyphicon-plus-sign"></i></a> {/if}
+			<span class=" btn btn-danger btn-responsive action-btn btn-delete" data-line="{$NUMLINE}"><i class="glyphicon glyphicon-trash" ></i></span>
+		</div>
+	</div>
+</div>

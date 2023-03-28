@@ -1,55 +1,154 @@
-{if $numline=='' && $smarty.get.numline != ''}{$numline=$smarty.get.numline}{/if}
-{loop type="advanceddescription.config" name="ajoutline" id="{$smarty.get.id|default:$line_id}" numline={$numline} object_id=$object_id lang=$edit_language_id}
-<div class="row mb-3 ui-state-default advanceddescription-line-{$numline} advanceddescription-line" data-structure="{$ID}" data-line="{$numline}" data-sort-id="{$numline}" style="border: 0.5px solid #CCC; border-radius: 4px; padding: 1em; margin: 2em 0;">
-    <input type="hidden" name="variable[{$NUMLINE}][structure]" value="{$ID}" >
-    <div class="col-md-2">
-        {$TITLE}{if $IMAGE} 
-        <img src="{image file="assets/images/{$IMAGE}" source="AdvancedDescription" }" alt="{$TITLE}" width="80">{/if}
-        <i class="glyphicon glyphicon-wrench btn btn-primary" data-line="{$numline}" onclick="$('.parametre-{$numline}').removeClass('d-none hide');"></i> <i class="glyphicon glyphicon-trash btn btn-danger" data-line="{$numline}"></i>
-    </div>
-    <div class="col-md-10">
-    {$STRUCTURE_BO nofilter}
-    </div>
-    <div class="alert alert-info col-md-12 d-none hide parametre-{$numline}" style="margin-top: 1em;">
-        {if $OPTION_TITRE}
-        <div class="col-md-1">
-            <select name="variable[{$NUMLINE}][option]" class="form-control">
-                <option value="0"{if $OPTION_H == 0} selected{/if}>Ne pas afficher</option>
-                <option value="1"{if $OPTION_H == 1} selected{/if}>h1</option>
-                <option value="2"{if $OPTION_H == 2} selected{/if}>h2</option>
-                <option value="3"{if $OPTION_H == 3} selected{/if}>h3</option>
-                <option value="4"{if $OPTION_H == 4} selected{/if}>h4</option>
-                <option value="5"{if $OPTION_H == 5} selected{/if}>h5</option>
-            </select>
-        </div>
-        {/if}
-        {if $OPTION_CLASS}
-        <div class="col-md-3">
-            <input type="text" name="variable[{$NUMLINE}][class]" value="{$CLASS}" placeholder="class" class="form-control">
-        </div>
-        {/if}
-        {if $OPTION_CLASS_1}
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][0]" value="{$CLASS0}" placeholder="class" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][1]" value="{$CLASS1}" placeholder="class" class="form-control">
-        </div>
-        {/if}
-        {if $OPTION_CLASS_3}
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][0]" value="{$CLASS0}" placeholder="class" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][1]" value="{$CLASS1}" placeholder="class" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][2]" value="{$CLASS2}" placeholder="class" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="variable[{$NUMLINE}][class][3]" value="{$CLASS3}" placeholder="class" class="form-control">
-        </div>
-        {/if}
-    </div>
+{if !isset($object_id)}{$object_id=0}{/if}
+{$config_id=''}
+{$numline=0}
+{if isset($smarty.get.numline) && $numline==0 && $smarty.get.numline != ''}{$numline=$smarty.get.numline}{/if}
+{if $config_id=='' && $smarty.get.config_id != ''}{$config_id=$smarty.get.config_id}{/if}
+{$lineparent=0}
+{if $smarty.get.lineparent}{$lineparent=$smarty.get.lineparent}{/if}
+{function name="ajaxline"}
+{$line_id = $line.racine}
+{$class = ''}
+{if isset($line.class)}
+{$class = $line.class}
+{/if}
+
+{if isset($line.plsLine)}
+	{$numline = $numline+$line.plsLine}
+{/if}
+{if $line_id}
+{$nameline="ajoutline{$numline}"}
+{loop type="advanceddescription.config" name=$nameline id="{$line_id}" numline={$numline} object_id=$object_id lang=$edit_language_id locale=$edit_language_locale}
+{* ui-state-default data-sort-id="{$numline}" *}
+<div class="{$class|default:"row col-md-12"}  mb-3  advanceddescription-line-{$numline} advanceddescription-line" data-structure="{$ID}" data-line="{$numline}"  style="border: 0.5px solid #CCC; border-radius: 4px; padding: 1em; margin: 2em 0; display: flex; flex-wrap: wrap;">
+    <input type="hidden" name="variableOld{if $lineparent}[child][{$lineparent}]{else}[racine]{/if}[{$numline}][structure]" value="{$ID}" >
+    <input type="hidden" name="variable{if $lineparent}[child][{$lineparent}]{else}[racine]{/if}[]" value="{$numline}" >
+    <input type="hidden" name="variable[{$numline}][structure]" id="st_li{$numline}" value="{$ID}" >
+    <input type="hidden" name="variable[{$numline}][css_class]" id="cc_li{$numline}" value="{$CSS_CLASS|default:$class}" >
+    <input type="hidden" name="variable[{$numline}][css_id]" id="ci_li{$numline}"  value="{$CSS_ID}" >
+    <div class="col-md-12">
+		{if $ID == 1}
+		<div class="zone-value">
+			<p class="text-center">
+				<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="action-btn btn-edit-advdesc" data-toggle="modal" data-numline="{$numline}"  data-valueid="{$config_id}" >Éditer pour ajouter un titre</a> 
+			</p>
+		</div>	
+		{/if}
+		{if $ID == 2 || $ID == 10}
+		<div class="zone-value">
+			<p class="text-center">
+				<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="action-btn btn-edit-advdesc" data-toggle="modal" data-numline="{$numline}"  data-valueid="{$config_id}" >Éditer pour ajouter du texte</a> 
+			</p>
+		</div>
+		{/if}
+		{if $ID == 3}
+		<div class="zone-value">
+			<p class="text-center">
+				<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="action-btn btn-edit-advdesc" data-toggle="modal" data-numline="{$numline}"  data-valueid="{$config_id}" >Éditer pour ajouter une image</a> 
+			</p>
+		</div>	
+		{/if}
+		{if $ID == 4}
+			<hr>
+		{/if}
+		<div id="insertline_{$numline}" class="row" style="display: flex; flex-wrap: wrap;">
+			{if isset($line.child) && $line.child}
+			{foreach from=$line.child item=foo}
+				{ajaxline line=$foo numline={$numline+$plsLine} object_id=$object_id lang=$edit_language_id locale=$edit_language_locale lineparent=$numline}
+			{/foreach}
+			{/if}
+			{*
+			{ajaxline line_id=1 numline={$numline+1} object_id=$object_id lang=$edit_language_id locale=$edit_language_locale}
+			{ajaxline line_id=2 numline={$numline+2} object_id=$object_id lang=$edit_language_id locale=$edit_language_locale}
+			*}
+		</div>
+		<div class="text-center btn-visible-hover">
+			<a title="Éditer une ligne" href="#advanceddescritpion_edit_dialog" class="btn btn-info btn-responsive action-btn btn-edit-advdesc" data-toggle="modal" data-numline="{$numline}"  data-valueid="{$config_id}" ><i class="glyphicon glyphicon-edit"></i></a> 
+	{if $ID == 12} <a title="Ajouter une ligne" href="#advanceddescritpion_creation_dialog" class="btn btn-warning btn-responsive action-btn btn-add-advdesc" data-toggle="modal" data-parent="{$numline}"><i class="glyphicon glyphicon-plus-sign"></i></a> {/if}
+			<span class=" btn btn-danger btn-responsive action-btn btn-delete" data-line="{$numline}"><i class="glyphicon glyphicon-trash" ></i></span>
+		</div>
+	</div>
 </div>
+
 {/loop}
+{/if}
+{/function}
+{$structure=[]}
+{$structure[] = [racine=>{$smarty.get.id|default:$line_id}, 'class'=>'']}
+
+{if {$smarty.get.id|default:$line_id} == 5}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-5', 'child'=>[['racine'=>3, 'plsLine'=>3]]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-7', 'child'=>[['racine'=>1, 'plsLine'=>4],['racine'=>2, 'plsLine'=>5]]]
+		]
+	]}
+{/if}
+{if {$smarty.get.id|default:$line_id} == 6}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-7', 'child'=>[['racine'=>1, 'plsLine'=>3],['racine'=>2, 'plsLine'=>4]]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-5', 'child'=>[['racine'=>3, 'plsLine'=>5]]]
+		]
+	]}
+{/if}
+
+{if {$smarty.get.id|default:$line_id} == 7}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-4', 'child'=>[['racine'=>3, 'plsLine'=>4, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-4', 'child'=>[['racine'=>3, 'plsLine'=>5, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>3, 'class'=>'col-md-4', 'child'=>[['racine'=>3, 'plsLine'=>6, 'class'=>'']]]
+		]
+	]}
+{/if}
+
+{if {$smarty.get.id|default:$line_id} == 8}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-6', 'child'=>[['racine'=>2, 'plsLine'=>3, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-6', 'child'=>[['racine'=>2, 'plsLine'=>4, 'class'=>'']]]
+		]
+	]}
+{/if}
+
+{if {$smarty.get.id|default:$line_id} == 9}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-4', 'child'=>[['racine'=>2, 'plsLine'=>4, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-4', 'child'=>[['racine'=>2, 'plsLine'=>5, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>3, 'class'=>'col-md-4', 'child'=>[['racine'=>2, 'plsLine'=>6, 'class'=>'']]]
+		]
+	]}
+{/if}
+
+{if {$smarty.get.id|default:$line_id} == 11}
+{$structure = []}
+{$structure[] = [
+	'racine'=>12, 'plsLine'=>0, 'class'=>'row', 
+	'child'=>[
+			['racine'=>12, 'plsLine'=>1, 'class'=>'col-md-6', 'child'=>[['racine'=>3, 'plsLine'=>3, 'class'=>'']]],
+			['racine'=>12, 'plsLine'=>2, 'class'=>'col-md-6', 'child'=>[['racine'=>3, 'plsLine'=>4, 'class'=>'']]]
+		]
+	]}
+{/if}
+{if {$smarty.get.id|default:$line_id} == 12}
+	{$structure = []}
+	{$structure[] = [racine=>12, 'class'=>'row']}
+{/if}
+{$plsLine=0}
+{foreach from=$structure item=foo}
+
+{ajaxline line=$foo numline={$numline+$plsLine} object_id=$object_id lang=$edit_language_id locale=$edit_language_locale lineparent=$lineparent}
+{$plsLine=$plsLine+1}
+
+{/foreach}

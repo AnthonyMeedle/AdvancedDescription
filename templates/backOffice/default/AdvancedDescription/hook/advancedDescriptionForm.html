@@ -1,7 +1,8 @@
-<div class="row {if $smarty.get.current_tab != '' && $smarty.get.current_tab != 'general'}hide d-none {/if}block-advanced-description">
+{if !isset($object_id)}{$object_id=''}{/if}
+<div class="row {if isset($smarty.get.current_tab) && $smarty.get.current_tab != '' && $smarty.get.current_tab != 'general'}hide d-none {/if}block-advanced-description" id="advanced-description">
     <div class="col-md-12 general-block-decorator">
-        <h2>{intl l="Advanced description"} <a title="Ajouter une ligne" href="#advanceddescritpion_creation_dialog" class="btn btn-primary btn-responsive action-btn pull-right float-right right" data-toggle="modal"><i class="glyphicon glyphicon-plus-sign"></i></a></h2>
-        {if $changelang}
+        <h2>{intl l="Advanced description"} <a title="Ajouter une ligne" href="#advanceddescritpion_creation_dialog" class="btn btn-primary btn-responsive action-btn pull-right float-right right btn-add-advdesc" data-parent="" data-toggle="modal"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Ajouter une ligne" href="#advanceddescritpion_move_dialog" class="btn btn-warning btn-responsive action-btn pull-right float-right right btn-move" data-parent="" data-toggle="modal"><i class="glyphicon glyphicon-move"></i></a> </h2>
+        {if isset($changelang) && $changelang}
             {include file="includes/inner-form-toolbar.html"
                 hide_flags=false
                 hide_submit_buttons=true
@@ -11,44 +12,105 @@
                 page_bottom=false
             }
         {/if}
-        <form action="{url path="/admin/modules/advanceddescription/form"}" method="post" class="form">
+
+		<ul class="nav nav-pills">
+		{loop name="lang_list" type="lang" backend_context="1"}
+		    <li {if $ID == $edit_language_id}class="active"{/if}>
+                {if isset($current_tab) && $current_tab}
+                    {$lang_url = {url path={$page_url|default:$current_url nofilter} edit_language_id=$ID current_tab=$current_tab}}
+                {else}
+                    {$lang_url = {url path={$page_url|default:$current_url nofilter} edit_language_id=$ID}}
+                {/if}
+		        <a class="language-change-button" data-language-id="{$ID}" href="{$lang_url nofilter}#advanced-description" title="{intl l='Edit information in %lng' lng={$TITLE}}">
+		            <img src="{image file="assets/img/flags/$CODE.png"}" alt=$TITLE />
+		        </a>
+		    </li>
+		    {/loop}
+		</ul>
+        <form action="{url path="/admin/modules/advanceddescription/form"}" method="post" class="form" id="formadvdesc">
+			<br>
+            <button class="btn btn-success col-md-12">Valider</button>
             {$structures=""}
             {$orderlines=""}
+			{$idconfig=''}
             {loop type="advanceddescription.object" name="lines" objtype={$object_type_id} objid=$object_id}
                 {$structures=$STRUCTURES}
                 {$orderlines=$ORDERLINES}
+				{$idconfig=$ID}
             {/loop}
             <input type="hidden" name="action" value="save_lines">
             <input type="hidden" name="objid" value="{$object_id}">
+            <input type="hidden" name="config_id" id="config_id" value="{$idconfig}">
             <input type="hidden" name="objtype" value="{$object_type_id}">
             <input type="hidden" name="structures" value="{$structures}" id="advanceddescriptionconfig">
             <input type="hidden" name="orderlines" value="{$orderlines}" id="advanceddescriptionordre">
-            <input type="hidden" name="success_url" value="{$success_url}">
-            {$numline=1}
+            <input type="hidden" name="success_url" value="{url path=$success_url}">
+			<input type="hidden" name="edit_language_id" value="{$edit_language_id}" />
+			<input type="hidden" name="edit_language_locale" value="{$edit_language_locale}" />
+
             <div id="advanced-description-champs">
-                {loop type="advanceddescription.description" name="advdesc" objtype=$objtype objid=$objid lang=$edit_language_id}
-                    {include file="AdvancedDescription/ajax-config.html" line_id=$CONFIG_ID object_id=$ID }
-                    {$numline=$numline+1}
+				{$description_objet_id=''}
+                {loop type="advanceddescription" name="advdesc" objtype=$objtype objid=$objid lang=$edit_language_id locale=$edit_language_locale}
+					{$description_objet_id=$ID}
+					{include file="../line-config.html" source="AdvancedDescription" nomboucle="advdescParent{$NUMLINE}"}
                 {/loop}
             </div>
-            <button class="btn btn-success">Valider</button>
+            <button class="btn btn-success col-md-12">Valider</button>
         </form>
     </div>
 </div>
 
 {capture "advanceddescritpion_creation_dialog"}
-    {loop type="advanceddescription.config" name="ajoutline"}
+	<input type="hidden" name="lineparent" id="lineparent" value="">
+     {loop type="advanceddescription.config" name="ajoutline"}
         <span class="btn btn-default btn-advanceddescritpion" data-line="{$ID}">
             {$TITLE}{if $IMAGE} <br><img src="{image file="assets/images/{$IMAGE}" source="AdvancedDescription" }" alt="{$TITLE}" width="80">{/if}
         </span>
     {/loop}
 {/capture}
 
+{capture "advanceddescritpion_move_dialog"}
+{*	<input type="hidden" name="action" value="moveline"> *}
+	<input type="hidden" name="action" value="save_lines">
+	<input type="hidden" name="objid" value="{$object_id}">
+	<input type="hidden" name="config_id" id="config_id" value="{$idconfig}">
+	<input type="hidden" name="objtype" value="{$object_type_id}">
+	<input type="hidden" name="success_url" value="{url path=$success_url}">
+	<input type="hidden" name="edit_language_id" value="{$edit_language_id}" />
+	<input type="hidden" name="edit_language_locale" value="{$edit_language_locale}" />
+    <div id="listmoveline" style="padding: 1rem;"></div>
+{/capture}
+
+{capture "advanceddescritpion_edit_dialog"} 
+	<input type="hidden" name="action" value="editvalue" >
+ 	<input type="hidden" name="id" id="idlineedit" value="{$description_objet_id}" >	
+	<input type="hidden" name="edit_language_id" value="{$edit_language_id}" />
+	<input type="hidden" name="edit_language_locale" value="{$edit_language_locale}" />
+
+	<div id="editvalue"></div>
+
+	<div class="form-group  d-none" id="textenrichie">
+		<label>Texte</label>
+		<div style="position: relative;">
+			<textarea name="value" id="editvaluetextenrichie" class="form-control wysiwyg" rows="6" ></textarea>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label>Attribut class</label>
+		<input type="text" name="css_class" id="edit_css_class" value="" class="form-control">
+	</div>
+	<div class="form-group">
+		<label>Attribut id</label>
+		<input type="text" name="css_id" id="edit_css_id" value="" class="form-control">
+	</div>
+{/capture}
+
 {capture "advanceddescritpion_updateimg"}
-    
+
 <div class="image-manager form-container" >
     <form action="{url path="/admin/modules/advanceddescription/form"}" class="dropzone dz-clickable" method="post" enctype="multipart/form-data" id="advdescdrop">
-        <input type="hidden" name="success_url" value="{$success_url}">
+        <input type="hidden" name="success_url" value="{url path=$success_url}">
         <input type="hidden" name="action" value="add-img">
         <input type="hidden" name="namefile" value="imgadvdesc"/>
         <input type="hidden" name="advdesc-img-line" class="advdesc-img-line" value=""/>
@@ -84,6 +146,60 @@
 
     form_action        = {url path='/admin/modules/advanceddescription/form'}
 }
+{include
+    file = "includes/generic-create-dialog.html"
+
+    dialog_id    = "advanceddescritpion_move_dialog"
+    dialog_title = {intl l="Déplacer les blocs"}
+    dialog_body  = {$smarty.capture.advanceddescritpion_move_dialog nofilter}
+	form_enctype = ' enctype="multipart/form-data"' 
+    dialog_ok_label     = {intl l="Valider"}
+
+    form_action        = {url path='/admin/modules/advanceddescription/form'}
+}
+{*
+{include
+    file = "includes/generic-create-dialog.html"
+	form_attributes = 'id="form-edit-line"' 
+    dialog_id    = "advanceddescritpion_edit_dialog"
+    dialog_title = {intl l="Edit a line"}
+    dialog_body  = {$smarty.capture.advanceddescritpion_edit_dialog nofilter}
+    dialog_ok_label     = {intl l="Valider"}
+	form_enctype = ' enctype="multipart/form-data"' 
+    form_action        = {url path='/admin/modules/advanceddescription/form'}
+}
+*}
+<div class="ombreedit d-none hidden btn-close-advdesc" style="position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, .2); z-index: 900;"></div>
+<div class="d-none hidden" id="modalmeedletiny" style="position: fixed;
+top: 2rem;
+background: #FFF;
+
+z-index: 1000;
+height: 80%;
+left: 20%;
+right: 20%;
+overflow: auto;
+box-shadow: 0rem 0rem 13rem 0rem #000;">
+<form method="POST" action="https://www.drony.fr/admin/modules/advanceddescription/form" enctype="multipart/form-data" id="form-edit-line">
+		<div class="modal-header">
+			<button type="button" class="btn-close-advdesc close">×</button>
+			<h3>Modification</h3>
+		</div>
+		<div class="modal-body">
+			{$smarty.capture.advanceddescritpion_edit_dialog nofilter}
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default btn-close-advdesc" ><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+			<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-check"></span> Valider</button>
+		</div>
+	</form>
+</div>
+
 
 {include
     file = "includes/generic-warning-dialog.html"
@@ -92,5 +208,15 @@
     dialog_title = {intl l="Update images"}
     dialog_body  = {$smarty.capture.advanceddescritpion_updateimg nofilter}
 
-    dialog_ok_label     = {intl l="Close update"}
+    dialog_ok_label = {intl l="Close update"}
 }
+<style>
+	#listimgdispo label{ border: 4px solid #FFF; } 
+	#listimgdispo input{ opacity:0; } 
+	#listimgdispo input[type="radio"]:checked+label{ border: 4px solid #000; } 
+	.btn-visible-hover{ opacity:0; }
+	.advanceddescription-line:hover > div > .btn-visible-hover{ opacity:1; }
+	
+	.hacktiny .mce-floatpanel{ position: fixed !important; z-index: 999999999999999999999999; }
+
+</style>

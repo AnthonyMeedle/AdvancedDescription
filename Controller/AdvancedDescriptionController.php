@@ -33,8 +33,40 @@ class AdvancedDescriptionController extends BaseAdminController
 		if(empty($_REQUEST['action']))$_REQUEST['action']='';
 		
 //		echo '<pre>'; print_r($_REQUEST); echo '</pre>'; exit;
-
+		
 		switch($_REQUEST['action']){
+			case 'editvalue':
+//				print_r($_REQUEST);
+				if(null !== $advancedDescriptionObject = AdvancedDescriptionObjectQuery::create()->findPk($_REQUEST['id'])){
+					$variables = json_decode( $advancedDescriptionObject->getVariables() , true );
+					$numligne = $_REQUEST['numline'];
+					$variables[$numligne]['css_class'] = $_REQUEST['css_class'];
+					$variables[$numligne]['css_id'] = $_REQUEST['css_id'];
+					if(isset($_REQUEST['structure_id']) && $_REQUEST['structure_id'] == 1){
+						if(isset($_REQUEST['option'])) $variables[$numligne]['option'] = $_REQUEST['option'];
+					}
+					$advancedDescriptionObject->setVariables( json_encode($variables) )->save();
+					
+					if(isset($_REQUEST['value']) || isset($_REQUEST['img_file']) || isset($_REQUEST['img_alt'])){
+						$advancedDescriptionObject->setLocale($this->getCurrentEditionLocale());
+						$valeurs = json_decode( $advancedDescriptionObject->getValeurs() , true );
+						if(isset($_REQUEST['value'])) $valeurs[$numligne]['value'] = $_REQUEST['value'];
+						
+						if(isset($_REQUEST['structure_id']) && $_REQUEST['structure_id'] == 3){
+							if(isset($_REQUEST['img_file'])) $valeurs[$numligne]['img_file'] = $_REQUEST['img_file'];
+							if(isset($_REQUEST['img_alt'])) $valeurs[$numligne]['img_alt'] = $_REQUEST['img_alt'];
+						}
+						$advancedDescriptionObject->setValeurs( json_encode($valeurs) )->save();
+					}
+					
+					if(isset($_REQUEST['structure_id']) && $_REQUEST['structure_id'] == 10){
+						$_REQUEST['value'] = nl2br($_REQUEST['value']);
+					}
+					
+					echo json_encode($_REQUEST);
+				}
+				exit;
+			break;
 			case 'update-emplacement-hook':
                 
                 if(null === $moduleHook = ModuleHookQuery::create()->filterByModuleId(AdvancedDescription::getModuleId())->filterByHookId($_REQUEST['thelia_module_hook_creation']['hook_id'])->findOne()){
@@ -67,6 +99,7 @@ class AdvancedDescriptionController extends BaseAdminController
                     $object = new AdvancedDescriptionObject();
                 }
                 $variables=NULL;
+				/*
                 if(isset($_REQUEST['variable']) && is_array($_REQUEST['variable']) && isset($_REQUEST['orderlines'])){
                     $orders = explode(',', $_REQUEST['orderlines']);
                     $variables = [];
@@ -75,10 +108,15 @@ class AdvancedDescriptionController extends BaseAdminController
                         $compteur++;
                         $variables[$compteur]=$_REQUEST['variable'][$position];
                     }
-                    $variables = serialize($variables);
-                }
-
-                $object->setLocale($this->getCurrentEditionLocale())->setObjtype($_REQUEST['objtype'])->setObjid($_REQUEST['objid'])->setStructures($_REQUEST['structures'])->setVariables($variables)->setValeurs($variables)->save();
+                    $variables = json_encode($variables);
+                }*/
+				if(isset($_REQUEST['variable']) && is_array($_REQUEST['variable'])){
+					$variables = json_encode($_REQUEST['variable']);
+				}
+				
+                $object->setLocale($this->getCurrentEditionLocale())->setObjtype($_REQUEST['objtype'])->setObjid($_REQUEST['objid']);
+				if(isset($_REQUEST['structures']))	$object->setStructures($_REQUEST['structures']);
+				$object->setVariables($variables)->save();
 			break;
 			case 'add-img':
                 $fileBeingUploaded = $this->getRequest()->files->get('file', null, true);
@@ -88,6 +126,18 @@ class AdvancedDescriptionController extends BaseAdminController
                     $namefile = $this->processFile($fileBeingUploaded, $_REQUEST['objid'], 'advancedDescription', 'image', array(), ['exe'=>'exe','pdf'=>'pdf']);
                 //    $seo->setFile($namefile)->save();
                 }
+            break;
+			case 'advanceddescription_delete':
+				if(isset($_REQUEST['objtype']) && isset($_REQUEST['objid'])){
+					if(null !== $object = AdvancedDescriptionObjectQuery::create()->filterByObjtype($_REQUEST['objtype'])->filterByObjid($_REQUEST['objid'])->findOne()){
+						$object->delete();
+					}
+				}
+				if(isset($_REQUEST['id'])){
+					if(null !== $object = AdvancedDescriptionObjectQuery::create()->findPk($_REQUEST['id'])){
+						$object->delete();
+					}
+				}
             break;
 		}
 		if(!empty($_REQUEST["success_url"])) return $response = $this->generateRedirect($_REQUEST["success_url"]);

@@ -6,29 +6,76 @@
             $('.block-advanced-description').addClass('d-none hide');
         }
     });
+	var jetonBtnAdvanceddescritpion = true;
+	
+	$('.btn-move').click(function(){
+        $.ajax({
+			url     : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-line-move"}",
+			data	: { id: $("#idlineedit").val() }, 
+			type    : 'post',
+			dataType: 'html',
+			success : function(retour) {
+			$('#listmoveline').html(retour);
+			
+
+			$( "#listmoveline" ).sortable({
+				placeholder: "ui-sortable-placeholder col-sm-12 my-5 py-5 alert alert-warning",
+				stop: function( event, ui ) { }
+			});
+			
+         }
+        });
+	});
+	
     $('.btn-advanceddescritpion').click(function(){
+		if(jetonBtnAdvanceddescritpion){
+			jetonBtnAdvanceddescritpion=false;
         var config = $('#advanceddescriptionconfig').val();
         var numDerLine = 1;
         if($('.advanceddescription-line').length){
-            var numDerLine = $('.advanceddescription-line:last').data('line');
-            numDerLine = numDerLine + 1;
+			var nbrLine = 0;
+			$('.advanceddescription-line').each(function(i, e){
+				console.log($(e).data('line'));
+				if(nbrLine <= $(e).data('line')) nbrLine = $(e).data('line')+1;
+			});
+			
+            var numDerLine = $('.advanceddescription-line').length + 1;
+			if(numDerLine < nbrLine)numDerLine = nbrLine;
         }
+		console.log('numDerLine : ' + numDerLine);
         if(config) config += ',';
         $('#advanceddescriptionconfig').val(config + $(this).data('line'));
+		
         $.ajax({
-         url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-config?id="}" + $(this).data('line') + '&numline=' + numDerLine,
+         url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-config?id="}" + $(this).data('line') + '&numline=' + numDerLine + '&lineparent=' + $('#lineparent').val() + '&config_id=' + $('#config_id').val(),
          type     : 'get',
          dataType : 'html',
          success  : function(retour) {
-            $('#advanced-description-champs').append(retour);
-            $('.advanceddescription-line .glyphicon-trash').unbind().click(function(){
+			 if($('#lineparent').val()){
+				 $('#insertline_' + $('#lineparent').val()).append(retour);
+			 }else{
+				 $('#advanced-description-champs').append(retour);
+			 }
+            jetonBtnAdvanceddescritpion = true;
+			 
+            $('.advanceddescription-line .btn-delete').unbind().click(function(){
+				if(!confirm('Êtes-vous sûr de vouloir supprimer ce bloc et son contenu ?'))return false;
                 $('.advanceddescription-line-' + $(this).data('line')).remove();
                 reloadStructure();
             });
             reloadStructure();
             choisirImg();
+			 
+			 
+			 $.ajax({
+				 url      : $('#formadvdesc').attr('action'),
+				 data     : $('#formadvdesc').serialize(),
+				 type     : 'post'
+			 });
+			 
          }
         });
+		}
     });
     
     $('.advanceddescription-line .glyphicon-trash').unbind().click(function(){
@@ -37,15 +84,10 @@
     });
     
     function choisirImg(){
-        $('.choisir_img').unbind().click(function(){
-            $('.advanceddescription-line-' + $('.advdesc-img-line').val()).find('.champ-image-' + $('.advdesc-img-num').val()).val($(this).attr('alt'));
-            if($('.advdesc-vignette-' + $('.advdesc-img-line').val()+'-'+ $('.advdesc-img-num').val()).length){
-                $('.advdesc-vignette-' + $('.advdesc-img-line').val()+'-'+ $('.advdesc-img-num').val()).attr('src', $(this).data('src'));
-
-            }else{
-                $('.btn-modal-img[data-line="'+ $('.advdesc-img-line').val() +'"][data-img="'+ $('.advdesc-img-num').val() +'"]').after(' <img src="' + $(this).data('src') + '" alt="" class="advdesc-vignette-'+ $('.advdesc-img-line').val() +'-'+ $('.advdesc-img-num').val() +'">');
-            }
-
+        $('.choisir_img_2').unbind().click(function(){
+			$('.choiximgedit').prop('checked', false);
+			$('.choiximgedit').parent().removeClass('active');
+			$('.choiximgedit[value="'+$(this).data('file')+'"]').prop('checked', true).parent().addClass('active');
         });
 
         $('.btn-modal-img').unbind().click(function(){
@@ -54,6 +96,12 @@
         });
     }
     function reloadStructure(){
+		
+		$('.btn-edit-advdesc, .btn-close-advdesc').unbind().click(function(){
+			$('#modalmeedletiny').toggleClass('d-none hidden');
+			$('.ombreedit').toggleClass('d-none hidden');
+		});
+
         $('#advanceddescriptionconfig').val('');
         var structures='';
         var orderline='';
@@ -65,6 +113,40 @@
         });
         $('#advanceddescriptionconfig').val(structures);
         $('#advanceddescriptionordre').val(orderline);
+		
+
+		$('.btn-add-advdesc').unbind('ajaxadd').click(function ajaxadd(){
+			$('#lineparent').val($(this).data('parent'));
+		});
+		$('.btn-edit-advdesc').unbind('ajaxedit').click(function ajaxedit(){
+			$('body').addClass('hacktiny');
+			
+			$('#edit_css_class').val($('#cc_li' + $(this).data('numline')).val());
+			$('#edit_css_id').val($('#ci_li' + $(this).data('numline')).val());
+			
+			$('#idlineedit').val($('#config_id').val());
+			
+			if($('.advanceddescription-line-' + $(this).data('numline') + ' .htmlintiny').length){
+				tinymce.get("editvaluetextenrichie").setContent($('.advanceddescription-line-' + $(this).data('numline') + ' .htmlintiny').html());
+			}else{
+				tinymce.get("editvaluetextenrichie").setContent('');
+			}
+			
+			 $.ajax({
+			 url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-edit?id="}" + $(this).data('valueid') +"&numline="+ $(this).data('numline'),
+			 type     : 'get',
+			 dataType : 'html',
+			 success  : function(retour) {
+				$('#editvalue').html(retour);
+			 }
+			});
+		});
+		
+            $('.advanceddescription-line .btn-delete').unbind().click(function(){
+				if(!confirm('Êtes-vous sûr de vouloir supprimer ce bloc et son contenu ?'))return false;
+                $('.advanceddescription-line-' + $(this).data('line')).remove();
+                reloadStructure();
+            });
     }
 
     var advDescImageDropzone = new Dropzone("#advdescdrop", {
@@ -103,15 +185,124 @@
             choisirImg();
          }
         });
+		$.ajax({
+         url      : "{url path="/admin/modules/advanceddescription/AdvancedDescription/ajax-file-img-edit"}",
+         type     : 'get',
+         dataType : 'html',
+         success  : function(retour) {
+            $('#listimgdispo').html(retour);
+            choisirImg();
+         }
+        });
         
     });
     choisirImg();
-    $( "#advanced-description-champs" ).sortable({
-        placeholder: "ui-sortable-placeholder col-sm-12 my-5 py-5 alert alert-warning",
-        stop: function( event, ui ) {
-            reloadStructure();
-        }
-    });
     $( "#advanced-description-champs" ).disableSelection();
+	reloadStructure();
+	
+	$('#form-edit-line').submit(function(){
+		$('#modalmeedletiny').toggleClass('d-none hidden');
+		$('body').removeClass('hacktiny');
+	//	console.log(tinymce.get("editvaluetext").getContent());
+//		console.log(tinymce.get('value'));
+		var value = '';
+		var option = '';
+		var editstructureid = '';
+		var choiximgedit = '';
+		var editvaluealt = '';
+		var img800 = '';
+		if($("#st_li" + $("#editnumline").val()).val() == 2 && $('#editvaluetextenrichie.wysiwyg').length){
+			value = tinymce.get("editvaluetextenrichie").getContent();
+		}else{
+			if($('textarea#editvaluetext').length){
+				value = $("#editvaluetext").val();
+			}else{
+				if($('input#editvalueinput').length){
+					value = $("#editvalueinput").val();
+				}
+			}
+		}
+		if($('#editoption').length){
+			option = $("#editoption").val();
+		}
+		
+		if($('#editstructureid').length){
+			editstructureid = $("#editstructureid").val();
+		}
+		if($('#editvaluealt').length){
+			editvaluealt = $("#editvaluealt").val();
+		}
+		if($('.choiximgedit:checked').length){
+			choiximgedit = $(".choiximgedit:checked").val();
+			img800 = $(".choiximgedit:checked").data('src');
+			
+		}
+		
+			var formData = {
+			  action: 'editvalue',
+			  id: $("#idlineedit").val(),
+			  numline: $("#editnumline").val(),
+			  css_class: $("#edit_css_class").val(),
+			  css_id: $("#edit_css_id").val(),
+			  value: value,
+			  option: option,
+			  structure_id: editstructureid,
+			  img_alt: editvaluealt,
+			  img_file: choiximgedit,
+			  img800: img800,
+			};
 
+		 $.ajax({
+         url      : $(this).attr('action'),
+         data     : formData,
+         type     : 'post',
+         dataType : 'json',
+         success  : function(retour) {
+			 /*
+            console.log(retour);
+			 
+			alert(retour.numline);
+			alert(retour.css_class);
+			alert(retour.css_id);
+			 */
+			var classCurrent = $('#cc_li' + retour.numline).val();
+			$('#cc_li' + retour.numline).val(retour.css_class);
+			$('#ci_li' + retour.numline).val(retour.css_id);
+			
+			 var retourzonevalue='';
+		 	if($("#st_li" + retour.numline).val() == 2 && $('#editvaluetextenrichie.wysiwyg').length){
+				retourzonevalue=retour.value;
+			}else{
+				if($('textarea#editvaluetext').length){
+					retourzonevalue=retour.value;
+				}else{
+					if($('input#editvalueinput').length){
+						var option = 1;
+						if(retour.option){
+							option = retour.option;
+							$('#option_li' + retour.numline).val(retour.option);
+						}
+						retourzonevalue='<h'+ option +'>'+ retour.value +'</h'+ option +'>';
+					}
+				}
+			}
+			 
+			 if(retour.img800){
+				 retourzonevalue='<img src="'+ retour.img800 +'" alt="'+ retour.alt +'" class="'+ retour.css_class +' img-responsive" id="">';
+			 }
+			 if(retourzonevalue){
+			 	$('.advanceddescription-line-' + retour.numline + ' .zone-value').html(retourzonevalue);
+			 }
+
+			$('.advanceddescription-line-' + retour.numline).removeClass('row');
+		 	$('.advanceddescription-line-' + retour.numline).removeClass(classCurrent).addClass(retour.css_class);
+			 if(!retour.css_class){
+				 $('.advanceddescription-line-' + retour.numline).addClass('row');
+			 }
+         }
+        });
+		$('#advanceddescritpion_edit_dialog').modal('hide');
+		return false;
+	});
+	
 </script>

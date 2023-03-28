@@ -118,7 +118,7 @@ class AdvancedDescriptionImage extends BaseLoop implements PropelSearchLoopInter
 
 				$event->setAllowZoom($this->getAllowZoom());
 
-				$this->dispatcher->dispatch(TheliaEvents::IMAGE_PROCESS, $event);
+				$this->dispatcher->dispatch($event, TheliaEvents::IMAGE_PROCESS);
                 $iu =  $event->getFileUrl();
                 $oiu = $event->getOriginalFileUrl();
                 $ip = $event->getCacheFilepath();

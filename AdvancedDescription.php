@@ -8,6 +8,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Thelia\Model\ConfigQuery;
 use Symfony\Component\Finder\Finder;
 use Thelia\Core\Template\TemplateDefinition;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 
 class AdvancedDescription extends BaseModule
 {
@@ -24,7 +25,7 @@ class AdvancedDescription extends BaseModule
     const BRAND = 4;
     const HOOK = 5;
 
-    public function postActivation(ConnectionInterface $con = null){
+    public function postActivation(ConnectionInterface $con = null): void{
         $database = new Database($con->getWrappedConnection());
         $database->insertSql(null, array(__DIR__ . '/Config/thelia.sql'));
         $database->insertSql(null, array(__DIR__ . '/Config/update.sql'));
@@ -73,7 +74,7 @@ class AdvancedDescription extends BaseModule
 	public function getFile(){
 		return $this->file;
 	}
-    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null): void
     {
         $uploadDir = $this->getUploadDir();
         $fileSystem = new Filesystem();
@@ -92,5 +93,12 @@ class AdvancedDescription extends BaseModule
         }
     }
     
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR.ucfirst(self::getModuleCode()).'/I18n/*'])
+            ->autowire(true)
+            ->autoconfigure(true);
+    }
     
 }
